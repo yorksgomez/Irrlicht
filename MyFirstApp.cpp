@@ -1,6 +1,8 @@
 /*input
 a
 */
+//g++ -Iirr/include -I/usr/X11R6/include  -O3 -ffast-math MyFirstApp.cpp -o ./MyFirstApp -Lirr/lib/Linux -lIrrlicht -L/usr/X11R6/lib -lGL -lXxf86vm -lXext -lX11 -lXcursor
+
 
 #include <irrlicht.h>
 #include "driverChoice.h"
