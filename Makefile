@@ -7,10 +7,10 @@ Target := MyFirstApp
 # List of source files, separated by spaces
 Sources := MyFirstApp.cpp
 # Path to Irrlicht directory, should contain include/ and lib/
-	#IrrlichtHome := ../..
+#IrrlichtHome := ../..
 IrrlichtHome := irr
 # Path for the executable. Note that Irrlicht.dll should usually also be there for win32 systems
-	#BinPath = ../../bin/$(SYSTEM)
+#BinPath = ../../bin/$(SYSTEM)
 BinPath = .
 
 # general compiler settings (might need to be set when compiling the lib, too)
