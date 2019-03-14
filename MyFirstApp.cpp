@@ -7,115 +7,79 @@ a
 
 using namespace irr;
 
+using namespace video;
+using namespace scene;
+using namespace core;
+
 #ifdef _MSC_VER
 	#pragma comment(lib, "irrlicht.lib")
 #endif
 
-class CSampleSceneNode : public scene::ISceneNode {
-	private: 
-		core::aabbox3d<f32> Box;
-		video::S3DVertex vertices[4];
-		video::SMaterial Material;
-
+class MyEventReceiver : public IEventReceiver
+{
 	public:
-		CSampleSceneNode(scene::ISceneNode* parent, scene::ISceneManager* mgr, s32 id)
-		: scene::ISceneNode(parent, mgr, id) {
-			Material.Wireframe = false;
-			Material.Lighting = false;
+		virtual bool OnEvent(const SEvent& event) {
 
-			vertices[0] = video::S3DVertex(0, 0, 10, 1, 1, 0, video::SColor(255, 0, 255, 255), 0, 1);
-			vertices[1] = video::S3DVertex(10, 0, -10, 1, 0, 0, video::SColor(255, 255, 0, 255), 1, 1);
-			vertices[2] = video::S3DVertex(0, 20, 0, 0, 1, 1, video::SColor(255, 255, 255, 0), 1, 0);
-			vertices[3] = video::S3DVertex(-10, 0, -10, 0, 0, 1, video::SColor(255, 0, 255, 0), 0, 0);
+			if(event.EventType == irr::EET_KEY_INPUT_EVENT)
+				KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
 
-			Box.reset(vertices[0].Pos);
-			for(s32 i = 1; i < 4; ++i)
-				Box.addInternalPoint(vertices[i].Pos);
+			return false;
+		}
+
+		virtual bool IsKeyDown(EKEY_CODE keyCode) const {
+			return KeyIsDown[keyCode];
+		}
+
+		MyEventReceiver() {
+
+			for (u32 i = 0; i < KEY_KEY_CODES_COUNT; ++i)
+				KeyIsDown[i] = false;
 
 		}
 
-		virtual void OnRegisterSceneNode() {
-
-			if(IsVisible)
-				SceneManager->registerNodeForRendering(this);
-
-			ISceneNode::OnRegisterSceneNode();
-		}
-
-		virtual void render() {
-			u16 indices[] = {0, 2, 3, 2, 1, 3, 1, 0, 3, 2, 0, 1};
-
-			video::IVideoDriver* driver = SceneManager->getVideoDriver();
-
-			driver->setMaterial(Material);
-			driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
-			driver->drawVertexPrimitiveList(&vertices[0], 4, &indices[0], 4, video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_16BIT);
-		}
-
-		virtual const core::aabbox3d<f32>& getBoundingBox() const {
-			return Box;
-		}
-
-		virtual u32 getMaterialCount() {
-			return 1;
-		}
-
-		virtual video::SMaterial& getMaterial(u32 i) {
-			return Material;
-		}
-
+	private:
+		bool KeyIsDown[KEY_KEY_CODES_COUNT];
 };
 
 int main() {
-
-	video::E_DRIVER_TYPE driverType = driverChoiceConsole();
-	if(driverType == video::EDT_COUNT)
+	E_DRIVER_TYPE driverType = driverChoiceConsole();
+	if(driverType == EDT_COUNT)
 		return 1;
 
-	IrrlichtDevice* device = createDevice(driverType, core::dimension2d<u32>(640, 480), 16, false);
+	MyEventReceiver receiver;
+
+	IrrlichtDevice* device = createDevice(driverType, dimension2d<u32>(600, 480), 16, false, false, false, &receiver);
 	if(!device)
 		return 2;
 
-	device->setWindowCaption(L"Scene node");
+	IVideoDriver* driver = device->getVideoDriver();
+	ISceneManager* smgr = device->getSceneManager();
 
-	video::IVideoDriver* driver = device->getVideoDriver();
-	scene::ISceneManager* smgr = device->getSceneManager();
-
-	smgr->addCameraSceneNode(0, core::vector3df(0, -40, 0), core::vector3df(0, 0, 0));
-
-	CSampleSceneNode *myNode = new CSampleSceneNode(smgr->getRootSceneNode(), smgr, 666);
-
-	scene::ISceneNodeAnimator* anim = smgr->createRotationAnimator(core::vector3df(0.8f, 0, 0.8f));
-
-	if(anim) {
-		myNode->addAnimator(anim);
-		anim->drop();
-		anim = 0;
+	ISceneNode* node = smgr->addSphereSceneNode();
+	if(node) {
+		node->setPosition(vector3df(0, 0, 30));
+		node->setMaterialTexture(0, driver->getTexture("media/wall.bmp"));
+		node->setMaterialFlag(EMF_LIGHTING, false);
 	}
 
-	myNode->drop();
-	myNode = 0;
+	ISceneNode* n = smgr->addCubeSceneNode();
+	if(n) {
+		n->setMaterialTexture(0, driver->getTexture("media/t351sml.jpg"));
+		n->setMaterialFlag(EMF_LIGHTING, false);
+		ISceneNodeAnimator* anim = smgr->createFlyCircleAnimator(vector3df(0, 0, 30), 20.0f);
 
-	u32 frames = 0;
-	while(device->run()) {
-		driver->beginScene(true, true, video::SColor(0, 100, 100, 100));
-
-		smgr->drawAll();
-
-		driver->endScene();
-		if(++frames == 100) {
-			core::stringw str = L"Edhawk Productions: [";
-			str += driver->getName();
-			str += L"] FPS[";
-			str += (s32)driver->getFPS();
-			str += L"]";
-
-			device->setWindowCaption(str.c_str());
-			frames = 0;
+		if(anim) {
+			n->addAnimator(anim);
+			anim->drop();
 		}
 
 	}
 
-	device->drop();
+	while(device->run()) {
+		driver->beginScene(true, true, SColor(255, 113, 113, 133));
+		smgr->drawAll();
+		driver->endScene();
+	}
+
 	return 0;
 }
