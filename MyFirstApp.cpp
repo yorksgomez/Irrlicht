@@ -16,9 +16,8 @@ using namespace io;
 
 int main() {
 	IrrlichtDevice* device;
-	MainWindow main(device, L"Mi primera ventana (bueno no)", core::dimension2d<u32>(480, 700));
+	MainWindow main(device, L"Mi primera ventana (bueno no)", core::dimension2d<u32>(700, 480));
 	main.start();
-
 
 	return 0;
 }
