@@ -5,19 +5,31 @@ a
 
 #include <irrlicht.h>
 #include <driverChoice.h>
+#include <iostream>
 
 using namespace irr;
 using namespace core;
 using namespace video;
 using namespace scene;
 using namespace io;
+using namespace gui;
 
 #include "mainwindow.h"
+#include "events.h"
+#include <string>
+
+using namespace std;
+
+using namespace base;
 
 int main() {
-	IrrlichtDevice* device;
-	MainWindow main(device, L"Mi primera ventana (bueno no)", core::dimension2d<u32>(700, 480));
-	main.start();
+	Context c;
+	Events receiver(&c);
 
+	IrrlichtDevice* device;
+	MainWindow main(device, L"Wyxes", core::dimension2d<u32>(MainWindow::width, MainWindow::height), &receiver);
+	c.mainwindow = &main;
+	main.setBackground(video::SColor(235, 235, 235, 220));
+	main.start();
 	return 0;
 }

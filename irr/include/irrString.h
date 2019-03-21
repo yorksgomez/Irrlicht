@@ -102,11 +102,15 @@ public:
 
 
 	//! Constructs a string from a float
-	explicit string(const double number)
+	explicit string(const double number, const int precision = 6)
 	: array(0), allocated(0), used(0)
 	{
+		string<char> p = "%0.";
+		p += precision;
+		p += "f";
+
 		c8 tmpbuf[255];
-		snprintf(tmpbuf, 255, "%0.6f", number);
+		snprintf(tmpbuf, 255, p.c_str(), number);
 		*this = tmpbuf;
 	}
 
