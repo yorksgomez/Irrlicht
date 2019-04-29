@@ -76,14 +76,78 @@ int main()
     node->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
     node->setMaterialTexture(0, driver->getTexture("media/particlewhite.bmp"));
 
+    //Create particle system
+    scene::IParticleSystemSceneNode* ps = smgr->addParticleSystemSceneNode(false);
+
+    scene::IParticleEmitter* em = ps->createBoxEmitter(
+      core::aabbox3df(-7, 0, -1, 7, 1, 7), //size
+      core::vector3df(0.0f, 0.06f, 0.0f), //initial direction
+      80, 100, //emit rate
+      video::SColor(0, 255, 255, 255), //darkest color
+      video::SColor(0, 255, 255, 255), //brightest color
+      800, 2000, 0, //min and max age, angle
+      core::dimension2df(10.f, 10.f), //min size
+      core::dimension2df(20.f, 20.f) //max size
+    );
+
+    ps->setEmitter(em);
+    em->drop();
+
+    ps->setPosition(core::vector3df(-70, 60, 40));
+    ps->setScale(core::vector3df(2, 2, 2));
+    ps->setMaterialFlag(video::EMF_LIGHTING, false);
+    ps->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
+    ps->setMaterialTexture(0, driver->getTexture("media/fire.bmp"));
+    ps->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
+
+    scene::IVolumeLightSceneNode* n = smgr->addVolumeLightSceneNode(0, -1, 32, 32, video::SColor(0, 255, 255, 255), video::SColor(0, 0, 0, 0));
+
+    if(n) {
+      n->setScale(core::vector3df(56.0f, 56.0f, 56.0f));
+      n->setPosition(core::vector3df(-120, 50, 40));
+
+      core::array<video::ITexture*> textures;
+      for(s32 g = 7; g > 0; --g) {
+        core::stringc tmp;
+        tmp = "media/portal";
+        tmp += g;
+        tmp += ".bmp";
+        video::ITexture* t = driver->getTexture(tmp.c_str());
+        textures.push_back(t);
+      }
+
+      scene::ISceneNodeAnimator* glow = smgr->createTextureAnimator(textures, 150);
+      n->addAnimator(glow);
+
+      glow->drop();
+    }
+
+    mesh = smgr->getMesh("media/dwarf.x");
+    scene::IAnimatedMeshSceneNode* anode = 0;
+
+    anode = smgr->addAnimatedMeshSceneNode(mesh);
+    anode->setPosition(core::vector3df(-50, 20, -60));
+    anode->setAnimationSpeed(15);
+
+    //add shadow
+    anode->addShadowVolumeSceneNode();
+    smgr->setShadowColor(video::SColor(150, 0, 0, 0));
+
+    anode->setScale(core::vector3df(2, 2, 2));
+    anode->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, true);
+
+
     smgr->addCameraSceneNodeFPS();
-    
+    device->getCursorControl()->setVisible(false);
+
     while(device->run()) {
 
-      driver->beginScene();
-      smgr->drawAll();
-      driver->endScene();
-      
+      if(device->isWindowActive()) {
+        driver->beginScene();
+        smgr->drawAll();
+        driver->endScene();
+      }
+
     }
 
     device->drop();
